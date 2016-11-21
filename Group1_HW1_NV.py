@@ -9,6 +9,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 import collections
+from itertools import chain
 
 ## Individual Work
 A = nx.read_weighted_edgelist("HW1_problem1.txt", delimiter = ' ', create_using = nx.DiGraph())
@@ -24,9 +25,13 @@ C.todense()
 
 # Print the shortest-path matrix
 D = nx.floyd_warshall_numpy(A, nodelist=['a','b','c','d','e'], weight='weight')
+print(D)
 
 # Calculate the diameter of the graph
-
+distances = nx.all_pairs_dijkstra_path_length(A)
+alldistancevalues = chain(*(row.values() for row in distances.values()))
+max(d for d in alldistancevalues if d != "inf")
+ 
 # Plot the degree distrubition of a graph
 degreeSeq = A.degree()
 degreecount=collections.Counter(dict.values(degreeSeq))
