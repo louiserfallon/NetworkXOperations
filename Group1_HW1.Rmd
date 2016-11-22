@@ -13,6 +13,9 @@ knitr::opts_chunk$set(echo = FALSE)
 #install.packages(c("png", "grid"))
 library(png)
 library(grid)
+
+# Change working directory to local directory
+setwd("C:/Users/user/Dropbox (Personal)/Imperial College Business School/MSc Business Analytics/Autumn Term/Network Analytics/Homework 1/Group Part/Git_Repo/NetworkXOperations")
 ```
 
 ## Exercise 1
@@ -20,7 +23,7 @@ library(grid)
 In this exercise we will use the directed graph specified in the `HW1_problem1.txt` file. The directed graph is shown in the following figure.
 
 ```{r fig.width=2, fig.height=2, fig.align='center'}
-img1 <- readPNG("C:/Users/user/Dropbox (Personal)/Imperial College Business School/MSc Business Analytics/Autumn Term/Network Analytics/Homework 1/Group Part/Git_Repo/NetworkXOperations/graph1.png")
+img1 <- readPNG("graph1.png")
 grid.raster(img1)
 ```
 
@@ -54,7 +57,7 @@ Table: Shortest paths matrix of directed graph
 **(d)** The degree distribution of the graphs represents the number of edges each node is connected to and is shown in the following bar chart.
 
 ```{r fig.width=2.5, fig.height=2.5, fig.align='center'}
-img2 <- readPNG("C:/Users/user/Dropbox (Personal)/Imperial College Business School/MSc Business Analytics/Autumn Term/Network Analytics/Homework 1/Group Part/Git_Repo/NetworkXOperations/bar1.png")
+img2 <- readPNG("bar1.png")
 grid.raster(img2)
 ```
 
@@ -73,19 +76,19 @@ Before drawing the graph, we create and apply function `graphAdjMatrix()` to the
 We first draw the undirected network without the weights. The resulting graph is as follows:
 
 ```{r fig.width=5, fig.height=4, fig.align='center'}
-img3 <- readPNG("C:/Users/user/Dropbox (Personal)/Imperial College Business School/MSc Business Analytics/Autumn Term/Network Analytics/Homework 1/Group Part/Git_Repo/NetworkXOperations/graph2_1.png")
+img3 <- readPNG("graph2_1.png")
 grid.raster(img3)
 ```
 
 Then we add the weights to the graph which are represented by both labels and the color of the edges. We present the graph in two different formats.
 
 ```{r fig.width=5, fig.height=5, fig.align='center'}
-img4 <- readPNG("C:/Users/user/Dropbox (Personal)/Imperial College Business School/MSc Business Analytics/Autumn Term/Network Analytics/Homework 1/Group Part/Git_Repo/NetworkXOperations/graph2_2.png")
+img4 <- readPNG("graph2_2.png")
 grid.raster(img4)
 ```
 
 ```{r fig.width=5, fig.height=5, fig.align='center'}
-img5 <- readPNG("C:/Users/user/Dropbox (Personal)/Imperial College Business School/MSc Business Analytics/Autumn Term/Network Analytics/Homework 1/Group Part/Git_Repo/NetworkXOperations/graph2_3.png")
+img5 <- readPNG("graph2_3.png")
 grid.raster(img5)
 ```
 
