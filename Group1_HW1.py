@@ -83,22 +83,13 @@ nx.is_weakly_connected(DGraph) # Weakly connected graph test
 nx.is_strongly_connected(DGraph) # Strongly connected graph test
 
 # Qn 2: Visualization Graph
-adjMatrix = np.loadtxt("HW1_problem2.txt", dtype=int)
+adjMatrix = np.loadtxt("HW2_problem2.txt", dtype=int)
 
 # Use graphAdjMatrix() function to read in both 0-1 and weighted adjacency matrices
 # Ensure that no 0-weighted edges are missed out
 adjShape = np.shape(adjMatrix)
 graph = graphAdjMatrix(adjMatrix[0 : adjShape[1], ], adjMatrix[adjShape[1] : adjShape[0], ])
 #graph = nx.from_numpy_matrix(adjMatrix[34:68,], parallel_edges=False, create_using=None)
-
-# Circular Layout
-plt.figure(figsize = (10, 8))
-
-edges,weights = zip(*nx.get_edge_attributes(graph,'weight').items())
-pos = nx.circular_layout(graph)
-nx.draw(graph, pos, node_color = 'black', edge_color = weights, 
-        width=2.5, edge_cmap=plt.cm.Blues)
-nx.draw_networkx_labels(graph, pos, font_color="white", font_size=10)
 
 # Graph without weights
 plt.figure(figsize = (10, 8))
@@ -108,6 +99,8 @@ nx.draw(graph, pos, node_color = 'blue', width = 3.0)
 nx.draw_networkx_labels(graph, pos, font_color = "white", font_size=10)
 
 # Graph with weights denoted by darkness of edges
+edges,weights = zip(*nx.get_edge_attributes(graph,'weight').items())
+
 plt.figure(figsize = (10, 8))
 
 pos = nx.spring_layout(graph,k=0.25,iterations=100)
@@ -116,5 +109,12 @@ nx.draw(graph, pos, node_color = 'black', edge_color = weights,
 nx.draw_networkx_labels(graph, pos, font_color = "white", font_size=10)
 nx.draw_networkx_edge_labels(graph, pos, edge_labels = nx.get_edge_attributes(graph, 'weight'), font_size = 8)
 
+# Circular Layout
+plt.figure(figsize = (10, 8))
+
+pos = nx.circular_layout(graph)
+nx.draw(graph, pos, node_color = 'black', edge_color = weights, 
+        width=2.5, edge_cmap=plt.cm.Blues)
+nx.draw_networkx_labels(graph, pos, font_color="white", font_size=10)
 
 

@@ -13,9 +13,6 @@ knitr::opts_chunk$set(echo = FALSE)
 #install.packages(c("png", "grid"))
 library(png)
 library(grid)
-
-# Change working directory to local directory
-setwd("C:/Users/user/Dropbox (Personal)/Imperial College Business School/MSc Business Analytics/Autumn Term/Network Analytics/Homework 1/Group Part/Git_Repo/NetworkXOperations")
 ```
 
 ## Exercise 1
@@ -28,7 +25,7 @@ grid.raster(img1)
 ```
 
 
-**(a)** First print the node-arc incidence matrix, where each row represents a node and each column represents an edge. If an edge goes from node $i$ to node $j$ then $\alpha_{ik} = -1$ and $\alpha_{ik} = 1$. The rest of the elements are equal to zero. The resulting matrix is as follows:
+**(a)** First print the node-arc incidence matrix, where each row represents a node and each column represents an edge. If an edge goes from node $i$ to node $j$ then $\alpha_{ik} = -1$ and $\alpha_{jk} = 1$. The rest of the elements are equal to zero. The resulting matrix is as follows:
 
 Table: Adjacency matrix of directed graph
 
@@ -52,7 +49,7 @@ Table: Shortest paths matrix of directed graph
 | d |$\infty$| \ 8 | 18| \ 0 | 3 |
 | e |$\infty$|$\infty$|$\infty$|$\infty$| 0 |
 
-**(c)** The diameter $d$ of the graph, which is the maximal of the shortest path is the maximum element in the second table and is equal to 18.
+**(c)** The diameter $d$ of the graph, which is the maximal of the shortest path, is the maximum non-infinite element in the second table, and is in this case 18.
 
 **(d)** The degree distribution of the graphs represents the number of edges each node is connected to and is shown in the following bar chart.
 
@@ -67,11 +64,11 @@ grid.raster(img2)
 
 ## Exercise 2
 
-In this ecercise we will use the undirected graph specified in the `HW1_problem2.txt` file.
+In this exercise we will use the undirected graph specified in the `HW1_problem2.txt` file.
 
 The file containts information about an undirected graph of 34 nodes and is consisted of a matrix of 68 rows and 34 columns. The first 34 rows represent the adjacency matrix of the undirected graph and the rest of the rows contain the weights associated with each edge.
 
-Before drawing the graph, we create and apply function `graphAdjMatrix()` to the two matrices that represent the adjacency matrix and the corresponding weights to check if the adjacency matrix contains more edges than the weighted adjacency matrix. In case it does, the function adds 0-weight edges to the final graph for the edges that are actually represented in the adjacency matrix but cannot be recognised in the weight-related matrix due to the value of their weigth which is equal to zero. In our case though, we do not have suck instances.
+Before drawing the graph, we create and apply the function `graphAdjMatrix()` to the two matrices that represent the adjacency matrix and the corresponding weights to check if the adjacency matrix contains more edges than the weighted adjacency matrix (i.e. edges with 0 weight). In case it does, the function adds 0-weight edges to the final graph for the edges that are actually represented in the adjacency matrix but cannot be recognised in the weight-related matrix due to the value of their weight which is equal to zero. In our case though, we do not have such instances.
 
 We first draw the undirected network without the weights. The resulting graph is as follows:
 
@@ -92,7 +89,7 @@ img5 <- readPNG("graph2_3.png")
 grid.raster(img5)
 ```
 
-The last circular format of the graph which includes weights gives a more clear image of the structure of the graph, as we can easily see which nodes are the ones with more nodes and which one are not. At the same time, we can easily compare the weights of different edges that belong to same nodes.
+The last circular format of the graph which includes weights gives a more clear image of the structure of the graph, as we can easily see which nodes are the ones with more edges and which ones are not. At the same time, we can easily compare the weights of different edges that belong to the same nodes.
 
 ---
 
