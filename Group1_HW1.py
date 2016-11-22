@@ -32,7 +32,7 @@ def graphAdjMatrix(nonweightedAdjMat, weightedAdjMat):
 DGraph = nx.read_weighted_edgelist("HW1_problem1.txt",create_using=nx.DiGraph())
 
 # Graph vis
-plt.figure(figsize = (8, 6))
+plt.figure(figsize = (4, 3))
 
 pos = nx.circular_layout(DGraph)
 edge_labels = dict([((u,v,), d['weight']) for u,v,d in DGraph.edges(data=True)])
@@ -68,7 +68,10 @@ out_degree_values = list(out_degrees.values())
 
 in_hist = [x + y for x, y in zip(in_degree_values, out_degree_values)]
 
-plt.hist(in_hist, width = 0.60, bins = np.arange(6)-0.3)
+plt.figure(figsize = (4, 3))
+
+plt.hist(in_hist, width = 0.60, bins = np.arange(6)-0.3, color = 'lightblue')
+plt.title('Degree distribution of the graph')
 plt.xlabel('Degree')
 plt.ylabel('Number of nodes')
 plt.xticks(range(max(in_hist)+1))
@@ -89,7 +92,7 @@ graph = graphAdjMatrix(adjMatrix[0 : adjShape[1], ], adjMatrix[adjShape[1] : adj
 #graph = nx.from_numpy_matrix(adjMatrix[34:68,], parallel_edges=False, create_using=None)
 
 # Circular Layout
-plt.figure(figsize = (15, 12))
+plt.figure(figsize = (10, 8))
 
 edges,weights = zip(*nx.get_edge_attributes(graph,'weight').items())
 pos = nx.circular_layout(graph)
@@ -98,22 +101,20 @@ nx.draw(graph, pos, node_color = 'black', edge_color = weights,
 nx.draw_networkx_labels(graph, pos, font_color="white", font_size=10)
 
 # Graph without weights
-plt.figure(figsize = (15, 12))
+plt.figure(figsize = (10, 8))
 
 pos = nx.spring_layout(graph, k=0.25, iterations=100)
 nx.draw(graph, pos, node_color = 'blue', width = 3.0)
 nx.draw_networkx_labels(graph, pos, font_color = "white", font_size=10)
 
 # Graph with weights denoted by darkness of edges
-plt.figure(figsize = (15, 12))
+plt.figure(figsize = (10, 8))
 
 pos = nx.spring_layout(graph,k=0.25,iterations=100)
 nx.draw(graph, pos, node_color = 'black', edge_color = weights, 
         width = 5.0, edge_cmap=plt.cm.Blues)
 nx.draw_networkx_labels(graph, pos, font_color = "white", font_size=10)
 nx.draw_networkx_edge_labels(graph, pos, edge_labels = nx.get_edge_attributes(graph, 'weight'), font_size = 8)
-
-
 
 
 
