@@ -37,7 +37,7 @@ Table: Adjacency matrix of directed graph
 | d |\ 0 |\ 0 |\ 0|\ 1| -1| -1| \ 1 |
 | e |\ 1 |\ 0 |\ 0|\ 0| \ 0| \ 1| \ 0 |
 
-**(b)** Next, we will calculate and print the shortest-path matrix which presents the shortest paths amongst all the nodes. In case there is no possible path from node $i$ to node $j$, then $\alpha_{ij} = \infty$. The matrix is the following:
+**(b)** Next, we will calculate and print the shortest-path matrix which presents the lengths of the shortest paths between all the nodes. Since this graph includes negative weight, we use Floyd-Warshall algorithm to compute all-pairs shortest path lengths. Note that in case there is no possible path from node $i$ to node $j$, then the shortest path length, $\alpha_{ij} = \infty$. The shortest-path matrix is the following:
 
 Table: Shortest paths matrix of directed graph
 
@@ -49,9 +49,9 @@ Table: Shortest paths matrix of directed graph
 | d |$\infty$| \ 8 | 18| \ 0 | 3 |
 | e |$\infty$|$\infty$|$\infty$|$\infty$| 0 |
 
-**(c)** The diameter $d$ of the graph, which is the maximal of the shortest path, is the maximum non-infinite element in the second table, and is in this case 18.
+**(c)** The diameter $d$ of the graph, which is the longest shortest path amongst all the paths, is the maximum finite element in the second table, and is in this case 18.
 
-**(d)** The degree distribution of the graphs represents the number of edges each node is connected to and is shown in the following bar chart.
+**(d)** The total degree distribution of the graph represents the total number of edges (including both incoming and outgoing edges) each node is connected to and is shown in the following bar chart.
 
 ```{r fig.width=2.5, fig.height=2.5, fig.align='center'}
 img2 <- readPNG("bar1.png")
@@ -64,11 +64,11 @@ grid.raster(img2)
 
 ## Exercise 2
 
-In this exercise we will use the undirected graph specified in the `HW1_problem2.txt` file.
+In this exercise we will use the undirected graph specified in the `HW2_problem2.txt` file.
 
 The file containts information about an undirected graph of 34 nodes and is consisted of a matrix of 68 rows and 34 columns. The first 34 rows represent the adjacency matrix of the undirected graph and the rest of the rows contain the weights associated with each edge.
 
-Before drawing the graph, we create and apply the function `graphAdjMatrix()` to the two matrices that represent the adjacency matrix and the corresponding weights to check if the adjacency matrix contains more edges than the weighted adjacency matrix (i.e. edges with 0 weight). In case it does, the function adds 0-weight edges to the final graph for the edges that are actually represented in the adjacency matrix but cannot be recognised in the weight-related matrix due to the value of their weight which is equal to zero. In our case though, we do not have such instances.
+Before drawing the graph, we create and apply the function `graphAdjMatrix()` to the two matrices that represent the adjacency matrix and the corresponding weights to check if the adjacency matrix contains more edges than the weighted adjacency matrix (i.e. edges with 0 weight). In case it does, the function adds 0-weight edges to the final graph for the edges that are actually represented in the adjacency matrix but cannot be recognised in the weight-related matrix due to the value of their weight which is equal to zero. In this particular graph though, we do not have such 0-weight edges.
 
 We first draw the undirected network without the weights. The resulting graph is as follows:
 
@@ -77,19 +77,21 @@ img3 <- readPNG("graph2_1.png")
 grid.raster(img3)
 ```
 
-Then we add the weights to the graph which are represented by both labels and the color of the edges. We present the graph in two different formats.
+Then we represent the weights of the edges using both labels (number shown on each edge) and colours (darker colour indicates heavier weight) of the edges. We present the graph in two different layouts (spring layout and circular layout).
 
 ```{r fig.width=5, fig.height=5, fig.align='center'}
 img4 <- readPNG("graph2_2.png")
 grid.raster(img4)
 ```
 
+The above two graphs were plotted using spring layout. This layout attempts to minimise the number of crossing edges and allow us to insepct the structure of the graph.
+
 ```{r fig.width=5, fig.height=5, fig.align='center'}
 img5 <- readPNG("graph2_3.png")
 grid.raster(img5)
 ```
 
-The last circular format of the graph which includes weights gives a more clear image of the structure of the graph, as we can easily see which nodes are the ones with more edges and which ones are not. At the same time, we can easily compare the weights of different edges that belong to the same nodes.
+The last circular format (shown above) of the graph, which represents edge-weights using colour (with darker colour indicating heavier weight), gives a clearer image of the structure of the graph, as we can easily see which nodes are the ones with more edges and which ones are not. At the same time, we can easily compare the weights of different edges that belong to the same nodes.
 
 ---
 

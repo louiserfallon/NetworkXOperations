@@ -31,11 +31,12 @@ def graphAdjMatrix(nonweightedAdjMat, weightedAdjMat):
 
 DGraph = nx.read_weighted_edgelist("HW1_problem1.txt",create_using=nx.DiGraph())
 
-# Graph vis
+# Figure Size
 plt.figure(figsize = (4, 3))
 
+# Graph Drawing for Qn 1
 pos = nx.circular_layout(DGraph)
-edge_labels = dict([((u,v,), d['weight']) for u,v,d in DGraph.edges(data=True)])
+edge_labels = dict([((u,v), d['weight']) for u,v,d in DGraph.edges(data=True)])
 nx.draw_networkx_edge_labels(DGraph, pos, edge_labels = edge_labels)
 nx.draw_networkx_labels(DGraph, pos)
 nx.draw(DGraph, pos, node_size = 500, node_color = 'lightblue')
@@ -70,7 +71,7 @@ in_hist = [x + y for x, y in zip(in_degree_values, out_degree_values)]
 
 plt.figure(figsize = (4, 3))
 
-plt.hist(in_hist, width = 0.60, bins = np.arange(6)-0.3, color = 'lightblue')
+plt.hist(in_hist, width = 0.60, bins = np.arange(max(in_hist)+2)-0.3, color = 'lightblue')
 plt.title('Degree distribution of the graph')
 plt.xlabel('Degree')
 plt.ylabel('Number of nodes')
@@ -89,31 +90,28 @@ adjMatrix = np.loadtxt("HW2_problem2.txt", dtype=int)
 # Ensure that no 0-weighted edges are missed out
 adjShape = np.shape(adjMatrix)
 graph = graphAdjMatrix(adjMatrix[0 : adjShape[1], ], adjMatrix[adjShape[1] : adjShape[0], ])
-#graph = nx.from_numpy_matrix(adjMatrix[34:68,], parallel_edges=False, create_using=None)
 
 # Graph without weights
-plt.figure(figsize = (10, 8))
+plt.figure(figsize = (12, 10))
 
 pos = nx.spring_layout(graph, k=0.25, iterations=100)
 nx.draw(graph, pos, node_color = 'blue', width = 3.0)
 nx.draw_networkx_labels(graph, pos, font_color = "white", font_size=10)
 
-# Graph with weights denoted by darkness of edges
-edges,weights = zip(*nx.get_edge_attributes(graph,'weight').items())
-
-plt.figure(figsize = (10, 8))
+# Graph with weights denoted by darkness of edges, weight is also labelled
+plt.figure(figsize = (12, 10))
 
 pos = nx.spring_layout(graph,k=0.25,iterations=100)
-nx.draw(graph, pos, node_color = 'black', edge_color = weights, 
+nx.draw(graph, pos, node_color = 'black', edge_color = [d['weight'] for (u, v, d) in graph.edges(data = True)], 
         width = 5.0, edge_cmap=plt.cm.Blues)
 nx.draw_networkx_labels(graph, pos, font_color = "white", font_size=10)
 nx.draw_networkx_edge_labels(graph, pos, edge_labels = nx.get_edge_attributes(graph, 'weight'), font_size = 8)
 
-# Circular Layout
-plt.figure(figsize = (10, 8))
+# Circular Layout, weights denoted by darkness of edges
+plt.figure(figsize = (12, 10))
 
 pos = nx.circular_layout(graph)
-nx.draw(graph, pos, node_color = 'black', edge_color = weights, 
+nx.draw(graph, pos, node_color = 'black', edge_color = [d['weight'] for (u, v, d) in graph.edges(data = True)], 
         width=2.5, edge_cmap=plt.cm.Blues)
 nx.draw_networkx_labels(graph, pos, font_color="white", font_size=10)
 
