@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Nov 17 13:47:19 2016
 
 @author: louisefallon
 """
