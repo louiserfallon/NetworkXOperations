@@ -574,7 +574,7 @@ def main():
     assignment = routing.SolveWithParameters(search_parameters)
     if assignment:
       # Solution cost.
-      print("Total distance: " + str(assignment.ObjectiveValue()) + " miles\n")
+      print("Total distance: " + str(assignment.ObjectiveValue()) + " km\n")
       # Inspect solution.
       # Only one route here; otherwise iterate from 0 to routing.vehicles() - 1
       route_number = 0
