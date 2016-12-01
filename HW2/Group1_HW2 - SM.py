@@ -15,6 +15,9 @@ from haversine import haversine
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 
+from ortools.constraint_solver import pywrapcp
+from ortools.constraint_solver import routing_enums_pb2
+
 import gurobipy
 
 # Function to read in two adjacency matrices in Q2
@@ -54,14 +57,14 @@ def calcDistance(coordMat, coordMat_latlong):
     havDistDF = pd.DataFrame(havDistMat, index = coordDF.index, columns = coordDF.index)
     return distDF, havDistDF
 
-# Given the selected path, find the subtour
-def findSubTour(selectedPairs):    
+# Given the selected path, find the subtour (for Qn 3c: Gurobi)
+def findSubTour(selectedPairs):
     notVisited = np.unique(selectedPairs).tolist()
     neighbours = [notVisited[0]]
     visited = []
 
     while (len(neighbours) > 0):
-        currCity = neighbours.pop(0)
+        currCity = neighbours.pop()
         neighbours1 = [j for i, j in selectedPairs.select(currCity, '*') if j in notVisited and j not in neighbours]
         neighbours2 = [i for i, j in selectedPairs.select('*', currCity) if i in notVisited and i not in neighbours]
         notVisited.remove(currCity)
@@ -73,7 +76,7 @@ def findSubTour(selectedPairs):
 
     return visited, notVisited           
 
-# Add lazy constraints to eliminate subtours
+# Add lazy constraints to eliminate subtours (for Qn 3c: Gurobi)
 def elimSubTour(model, where):
     if where == gurobipy.GRB.Callback.MIPSOL:
         vals = model.cbGetSolution(model._xVar)
@@ -85,7 +88,43 @@ def elimSubTour(model, where):
                                            gurobipy.quicksum(model._xVar[j, i] for j in notVisited for i in visited if i > j) 
                                            >= 2)
 
-# Qn 2
+# Plot path
+def plotPath(worldCoordinates, tour, filename):
+    # Plot the World map around Djibouti
+    mapDjibouti = Basemap(projection = 'mill', 
+                          llcrnrlat = worldCoordinates.min(axis = 0)[0] - 0.3, 
+                          llcrnrlon = worldCoordinates.min(axis = 0)[1] - 0.3, 
+                          urcrnrlat = worldCoordinates.max(axis = 0)[0] + 0.3, 
+                          urcrnrlon = worldCoordinates.max(axis = 0)[1] + 0.3, 
+                          resolution = 'i')
+    # Draw coastline, country borders, and background image
+    mapDjibouti.drawcoastlines(linewidth = 1.0)
+    mapDjibouti.drawcountries(linewidth = 2.0, color = 'red')
+    mapDjibouti.bluemarble()
+    
+    # Plot all the cities in Djibouti
+    xPlot, yPlot = mapDjibouti(worldCoordinates[ : , 1], worldCoordinates[ : , 0]) # x is longitude, y is latitude
+    mapDjibouti.plot(xPlot, yPlot, 'co', markersize = 5)
+    
+    xs = []
+    ys = []
+    
+    # Plot the optimal tour
+    for i in tour:    
+        x, y = mapDjibouti(worldCoordinates[i - 1, 1], worldCoordinates[i - 1, 0])
+        xs.append(x)
+        ys.append(y)
+    
+    print('Route in', filename, ':', tour)
+    mapDjibouti.plot(xs, ys, color = 'blue', linewidth = 1, label = 'Tour')
+    
+    # Set the title and save to PDF
+    plt.title('Djibouti TSP')
+    plt.savefig(filename)
+    plt.show()
+    plt.close()
+
+''' Qn 2 '''
 adjMatrix = np.loadtxt("HW2_problem 2.txt", dtype=int)
 
 # Use graphAdjMatrix() function to read in both 0-1 and weighted adjacency matrices
@@ -115,6 +154,81 @@ coordMat_latlong = coordMat / 1000
 eucDistDF, havDistDF = calcDistance(coordMat, coordMat_latlong)
 havDistMat = havDistDF.as_matrix()
 
+''' Qn 3b: Google OR Tools '''
+# Distance callback
+class CreateDistanceCallback(object):
+  """Create callback to calculate distances between points."""
+  def __init__(self, distMat):
+    """Array of distances between points."""
+    self.matrix = distMat
+
+  def Distance(self, from_node, to_node):
+    return self.matrix[from_node][to_node]
+
+def ortools(distMat):
+    
+    tsp_size = distMat.shape[0]
+    selected = []
+    bestRoute = ''
+    
+    # Create routing model
+    if tsp_size > 0:      
+        
+        bestObj = np.Inf
+        
+        search_parameters = pywrapcp.RoutingModel.DefaultSearchParameters()        
+        # Setting first solution heuristic: the
+        # method for finding a first solution to the problem.
+        search_parameters.first_solution_strategy = (
+            routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
+        
+        # Create the distance callback, which takes two arguments (the from and to node indices)
+        # and returns the distance between these nodes.        
+        dist_between_nodes = CreateDistanceCallback(distMat)
+        dist_callback = dist_between_nodes.Distance            
+        
+        for i in range(tsp_size):
+            # TSP of size tsp_size
+            # Second argument = 1 to build a single tour (it's a TSP).
+            # Nodes are indexed from 0 to tsp_size - 1. By default the start of
+            # the route is node 0.
+            routing = pywrapcp.RoutingModel(tsp_size, 1, i)
+            
+            routing.SetArcCostEvaluatorOfAllVehicles(dist_callback)
+            # Solve, returns a solution if any.
+            assignment = routing.SolveWithParameters(search_parameters)
+            if assignment:
+                if assignment.ObjectiveValue() < bestObj:
+                    bestObj = assignment.ObjectiveValue()
+                    route_number = 0
+                    index = routing.Start(route_number) # Index of the variable for the starting node.
+                    bestRoute = ''
+                    selected = []
+                    while not routing.IsEnd(index):
+                        # Convert variable indices to node indices in the displayed route.
+                        bestRoute += str(routing.IndexToNode(index) + 1) + ' -> '
+                        selected.append(routing.IndexToNode(index) + 1)
+                        index = assignment.Value(routing.NextVar(index))
+                        
+                    bestRoute += str(routing.IndexToNode(index) + 1)
+                    selected.append(routing.IndexToNode(index) + 1)
+                    
+            else:
+                print('No solution found for starting node:', i)
+                
+        print("Total distance:", str(bestObj), " km\n")
+        print("ORTools Route:\n\n", bestRoute)                    
+            
+    else:
+        print('Specify an instance greater than 0.')
+        
+    return selected
+
+ortoolsTour = ortools(havDistMat)
+
+plotPath(coordMat_latlong, ortoolsTour, 'Djibouti-ortools.pdf')
+    
+''' Qn 3c: Gurobi Solver '''
 # Initialize Gurobi Model
 tspModel = gurobipy.Model('DjiboutiTSP')
 # All distinct city pairs
@@ -136,37 +250,22 @@ tspModel.optimize(elimSubTour)
 
 # Get the selected path
 vals = tspModel.getAttr('x', xVar)
-selected = gurobipy.tuplelist((i, j) for i, j in vals.keys() if vals[i,j] > 0.5)
+gurobiSelected = gurobipy.tuplelist((i, j) for i, j in vals.keys() if vals[i,j] > 0.5)
 
-# Plot Tour
-coordMat_latlong.min(axis = 0)
-coordMat_latlong.max(axis = 0)
+gurobiTour = findSubTour(gurobiSelected)[0]
+gurobiTour.append(gurobiTour[0]) # Return to the first city for complete tour
 
-# Plot the World map around Djibouti
-mapDjibouti = Basemap(projection = 'mill', 
-                      llcrnrlat = coordMat_latlong.min(axis = 0)[0] - 0.3, 
-                      llcrnrlon = coordMat_latlong.min(axis = 0)[1] - 0.3, 
-                      urcrnrlat = coordMat_latlong.max(axis = 0)[0] + 0.3, 
-                      urcrnrlon = coordMat_latlong.max(axis = 0)[1] + 0.3, 
-                      resolution = 'i')
-# Draw coastline, country borders, and background image
-mapDjibouti.drawcoastlines(linewidth = 1.0)
-mapDjibouti.drawcountries(linewidth = 2.0, color = 'red')
-mapDjibouti.bluemarble()
+''' Qn 3d: Plot the Tour '''
+plotPath(coordMat_latlong, gurobiTour, 'Djibouti-gurobi.pdf')
 
-# Plot all the cities in Djibouti
-xPlot, yPlot = mapDjibouti(coordMat_latlong[ : , 1], coordMat_latlong[ : , 0]) # x is longitude, y is latitude
-mapDjibouti.plot(xPlot, yPlot, 'co', markersize = 5)
+''' Print the total distance for ortools tour '''
+sumDist = 0
+for i in range(len(ortoolsTour) - 1):
+    sumDist += havDistMat[ortoolsTour[i] - 1, ortoolsTour[i + 1] - 1]
+print('ortools distance:', sumDist)
 
-# Plot the optimal tour
-for (i, j) in selected:
-    x1, y1 = mapDjibouti(coordMat_latlong[i - 1, 1], coordMat_latlong[i - 1, 0])
-    x2, y2 = mapDjibouti(coordMat_latlong[j - 1, 1], coordMat_latlong[j - 1, 0])
-    xs = [x1, x2]
-    ys = [y1, y2]
-    mapDjibouti.plot(xs, ys, color = 'blue', linewidth = 1, label = 'Tour')
-
-# Set the title and save to PDF
-plt.title('Djibouti TSP')
-plt.savefig('Djibouti.pdf')
-plt.show()
+''' Print the total distance for gurobi tour '''
+sumDist = 0
+for i in range(len(gurobiTour) - 1):
+    sumDist += havDistMat[gurobiTour[i] - 1, gurobiTour[i + 1] - 1]
+print('gurobi distance:', sumDist)
