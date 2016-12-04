@@ -57,37 +57,6 @@ def calcDistance(coordMat, coordMat_latlong):
     havDistDF = pd.DataFrame(havDistMat, index = coordDF.index, columns = coordDF.index)
     return distDF, havDistDF
 
-# Given the selected path, find the subtour (for Qn 3c: Gurobi)
-def findSubTour(selectedPairs):
-    notVisited = np.unique(selectedPairs).tolist()
-    neighbours = [notVisited[0]]
-    visited = []
-
-    while (len(neighbours) > 0):
-        currCity = neighbours.pop()
-        neighbours1 = [j for i, j in selectedPairs.select(currCity, '*') if j in notVisited and j not in neighbours]
-        neighbours2 = [i for i, j in selectedPairs.select('*', currCity) if i in notVisited and i not in neighbours]
-        notVisited.remove(currCity)
-        visited.append(currCity)
-        while len(neighbours1) > 0:
-            neighbours.append(neighbours1.pop())
-        while len(neighbours2) > 0:
-            neighbours.append(neighbours2.pop())
-
-    return visited, notVisited           
-
-# Add lazy constraints to eliminate subtours (for Qn 3c: Gurobi)
-def elimSubTour(model, where):
-    if where == gurobipy.GRB.Callback.MIPSOL:
-        vals = model.cbGetSolution(model._xVar)
-        selectedPairs = gurobipy.tuplelist((i, j) for i, j in vals.keys() if vals[i, j] > 0.5)
-        visited, notVisited = findSubTour(selectedPairs)
-        # If there is subtour, add constraint: the cut should have at least 2 edges
-        if len(notVisited) > 0:
-            model.cbLazy(gurobipy.quicksum(model._xVar[i, j] for j in notVisited for i in visited if i < j) + 
-                                           gurobipy.quicksum(model._xVar[j, i] for j in notVisited for i in visited if i > j) 
-                                           >= 2)
-
 # Plot path
 def plotPath(worldCoordinates, tour, filename):
     # Plot the World map around Djibouti
@@ -105,6 +74,12 @@ def plotPath(worldCoordinates, tour, filename):
     # Plot all the cities in Djibouti
     xPlot, yPlot = mapDjibouti(worldCoordinates[ : , 1], worldCoordinates[ : , 0]) # x is longitude, y is latitude
     mapDjibouti.plot(xPlot, yPlot, 'co', markersize = 5)
+    
+    k = 1
+    for (lat, long) in worldCoordinates:
+        xlabel, ylabel = mapDjibouti(long, lat)
+        plt.text(xlabel, ylabel, k, fontsize = 5)
+        k += 1    
     
     xs = []
     ys = []
@@ -157,13 +132,13 @@ havDistMat = havDistDF.as_matrix()
 ''' Qn 3b: Google OR Tools '''
 # Distance callback
 class CreateDistanceCallback(object):
-  """Create callback to calculate distances between points."""
-  def __init__(self, distMat):
-    """Array of distances between points."""
-    self.matrix = distMat
+    """Create callback to calculate distances between points."""
+    def __init__(self, distMat):
+        """Array of distances between points."""
+        self.matrix = distMat
 
-  def Distance(self, from_node, to_node):
-    return self.matrix[from_node][to_node]
+    def Distance(self, from_node, to_node):
+        return self.matrix[from_node][to_node]
 
 def ortools(distMat):
     
@@ -229,6 +204,37 @@ ortoolsTour = ortools(havDistMat)
 plotPath(coordMat_latlong, ortoolsTour, 'Djibouti-ortools.pdf')
     
 ''' Qn 3c: Gurobi Solver '''
+# Given the selected path, find the subtour (for Qn 3c: Gurobi)
+def findSubTour(selectedPairs):
+    notVisited = np.unique(selectedPairs).tolist()
+    neighbours = [notVisited[0]]
+    visited = []
+
+    while (len(neighbours) > 0):
+        currCity = neighbours.pop()
+        neighbours1 = [j for i, j in selectedPairs.select(currCity, '*') if j in notVisited and j not in neighbours]
+        neighbours2 = [i for i, j in selectedPairs.select('*', currCity) if i in notVisited and i not in neighbours]
+        notVisited.remove(currCity)
+        visited.append(currCity)
+        while len(neighbours1) > 0:
+            neighbours.append(neighbours1.pop())
+        while len(neighbours2) > 0:
+            neighbours.append(neighbours2.pop())
+
+    return visited, notVisited           
+
+# Add lazy constraints to eliminate subtours (for Qn 3c: Gurobi)
+def elimSubTour(model, where):
+    if where == gurobipy.GRB.Callback.MIPSOL:
+        vals = model.cbGetSolution(model._xVar)
+        selectedPairs = gurobipy.tuplelist((i, j) for i, j in vals.keys() if vals[i, j] > 0.5)
+        visited, notVisited = findSubTour(selectedPairs)
+        # If there is subtour, add constraint: the cut should have at least 2 edges
+        if len(notVisited) > 0:
+            model.cbLazy(gurobipy.quicksum(model._xVar[i, j] for j in notVisited for i in visited if i < j) + 
+                                           gurobipy.quicksum(model._xVar[j, i] for j in notVisited for i in visited if i > j) 
+                                           >= 2)
+
 # Initialize Gurobi Model
 tspModel = gurobipy.Model('DjiboutiTSP')
 # All distinct city pairs
