@@ -270,3 +270,44 @@ Pool objective bound 731.769
 
 Optimal solution found (tolerance 1.00e-04)
 Best objective 7.317688525815e+02, best bound 7.317688525815e+02, gap 0.0000%
+
+Gurobi 7.0.1 (mac64, Python) logging started Mon Dec  5 23:04:52 2016
+
+Changed value of parameter LazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 38 rows, 703 columns and 1406 nonzeros
+Variable types: 0 continuous, 703 integer (703 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [6e-01, 2e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Found heuristic solution: objective 3384.58
+Presolve time: 0.01s
+Presolved: 38 rows, 703 columns, 1406 nonzeros
+Variable types: 0 continuous, 703 integer (703 binary)
+
+Root relaxation: objective 6.993573e+02, 49 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  699.35728    0   10 3384.57839  699.35728  79.3%     -    0s
+H    0     0                     854.9674757  699.35728  18.2%     -    0s
+H    0     0                     851.7101507  699.35728  17.9%     -    0s
+     0     0  718.64526    0   10  851.71015  718.64526  15.6%     -    0s
+     0     0  723.34651    0   12  851.71015  723.34651  15.1%     -    0s
+*    0     0               0     731.7688526  731.76885  0.00%     -    0s
+
+Cutting planes:
+  Zero half: 4
+  Lazy constraints: 11
+
+Explored 0 nodes (82 simplex iterations) in 0.14 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 4: 731.769 851.71 854.967 3384.58 
+Pool objective bound 731.769
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 7.317688525815e+02, best bound 7.317688525815e+02, gap 0.0000%
