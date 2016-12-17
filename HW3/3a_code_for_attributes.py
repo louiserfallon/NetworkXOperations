@@ -12,7 +12,7 @@ from collections import OrderedDict
 import json
 
 # Change directory to your local directory to run code
-os.chdir('C:/Users/user/Dropbox (Personal)/Imperial College Business School/MSc Business Analytics/Autumn Term/Network Analytics/Homework 3/Group Part')
+os.chdir('C:/Users/user/Dropbox (Personal)/Imperial College Business School/MSc Business Analytics/Autumn Term/Network Analytics/Git_Repo/NetworkXOperations/HW3')
 
 # Create an empty list for the villages characteristics
 csd = []
