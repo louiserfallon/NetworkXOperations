@@ -1,0 +1,111 @@
+---
+title: "Group 1 HW 3 - Q2"
+author: "Siow Meng Low"
+date: "17 December 2016"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Forecasting Model  
+
+In the _Bass Model_ article, the forecasting model is given as below:
+
+\begin{center}
+$$F_t = (p + q[C_{t-1} / m])(m - C_{t-1})$$
+$$F_t = pm + (q - p) C_{t-1} - \frac{q}{m} C_{t-1}^2$$
+\end{center}
+
+The paraemters used in the above equation is described below:  
+
+* $F_t$: Forecasted number of new adopters during time period $t$, denoted as $N(t)$ in the class lecture notes
+* $C_{t-1}$: Cumulative number of people who have adopted the product up to time $t - 1$
+* $p$: Coefficient of innovation (a.k.a. Rate of spontatneous adoption in the class lecture notes)
+* $q$: Coefficient of imitation (a.k.a. Rate of imitation in the class lecture notes)
+* $m$: Market size, the number of people estimated to eventually adopt the new product
+
+From the above equation, we can see that $F_t$ is a function of $C_{t-1}$ and $C_{t-1}^2$. In the article, the authors proposed to minimise the sum of squared forecast errors $\sum_{t=1}^{N} E_t^2$ where:  
+
+* $S_t$: the actual number of new adopters in period $t$, denoted as $S(t)$ in the class lecture notes
+* $E_t = F_t - S_t$, $E_t$ is the forecast error for period $t$  
+
+This is the same technique used in the Ordinary Least Square Estimation of Linear Regression, where we take $F_t$ (the forecasted number of new adopters in period _t_) to be $\hat{S_t}$ (the estimated number of adopters in period t). The equation for linear regression can be written as:
+
+\begin{center}
+$$F_t = \hat{p}\hat{m} + (\hat{q} - \hat{p}) C_{t-1} - \frac{\hat{q}}{\hat{m}} C_{t-1}^2$$
+$$\hat{S_t} = \hat{a} + \hat{b} C_{t-1} + \hat{c} C_{t-1}^2$$
+\end{center}
+
+where:
+
+\begin{center}
+$$\hat{S_t} = F_t$$
+$$\hat{a} = \hat{p}\hat{m}$$
+$$\hat{b} = \hat{q} - \hat{p}$$
+$$\hat{c} = - \frac{\hat{q}}{\hat{m}}$$
+\end{center}
+
+The system of equations involving $\hat{p}$, $\hat{q}$, and $\hat{m}$ can be rewritten as follows:
+
+\begin{center}
+$$\hat{m} = \frac{-\hat{b} \pm \sqrt{\hat{b}^2 - 4\hat{a}\hat{c}}}{2\hat{c}}$$
+$$\hat{p} = \frac{\hat{a}}{\hat{m}}$$
+$$\hat{q} = - \hat{c}\hat{m}$$
+\end{center}
+
+Note that for $\hat{m}$, we are only interested in its non-negative real root, since the market size should always be greater than or equal to zero.  
+
+In the following section, we shall perform least square regression (dependent variable is $S_t$ and independent variables are $C_{t-1}$ and $C_{t-1}^2$) using R, in order to obtain the rolling horizon estimates of $p$, $q$, $m$, and $F_t$.  
+
+## Rolling Horizon Estimate using Ordinary Least Square Regression  
+
+```{r Libraries, echo = FALSE}
+library(pander)
+```
+
+The table that contains the box office revenue data of "The Doctor" is included in the CSV file, _TheDoctorData.csv_. First, we shall read the revenue data from the CSV and calculate $C_{t-1}$ for each period.  
+
+```{r ReadData, results = "asis"}
+setwd("C:/Users/admin/Desktop/Imperial MSc/Network Analytics/Assignment 3")
+
+doctorData <- read.csv("TheDoctorData.csv")
+doctorData$"Ctlag" <- c(0, doctorData$Ct[1:(nrow(doctorData) - 1)])
+
+pander(doctorData, 
+       caption = "Revenues and Cumulative Revenues in $ Millions for THE DOCTOR")
+
+```
+
+Next, starting at week 5 ($t = 5$), we shall use the observed cumulative revenues, $C_{t-1}$ to obtain the rolloing-horizon estimates of the parameters.  
+
+In the following section, OLS regressions are performed (for $t = 5, 6, ..., 12$) and the eight sets of estimated parameters are tabulated below:  
+
+```{r Regression, results = "asis"}
+finalTable = data.frame()
+
+# Start forecasting at t = 5
+tValues <- doctorData$Week[5 : nrow(doctorData)]
+for (tValue in tValues) {
+    modelDoctor <- lm(St ~ I(Ctlag) + I(Ctlag^2), data = doctorData[1 : (tValue - 1), ])
+    a <- modelDoctor$coefficients[1]
+    b <- modelDoctor$coefficients[2]
+    c <- modelDoctor$coefficients[3]
+    m <- c((-b + sqrt(b^2 - 4 * a * c)) / (2 * c), (-b - sqrt(b^2 - 4 * a * c)) / (2 * c))
+    m <- m[!is.nan(m) & m >= 0] # Only get the positive root
+    p <- a / m
+    q <- -c * m
+    Ft <- predict(modelDoctor, newdata = data.frame(Ctlag = doctorData$Ctlag[tValue]))
+    finalTable <- rbind(finalTable, data.frame(week = tValue, p = p, q = q, m = m, 
+                                               Ft = Ft, St = doctorData$St[tValue], 
+                                               row.names = NULL))
+}
+
+panderOptions('round', 3)
+pander(finalTable, caption = "Rolling Horizon Estimates of p, q, m, and Ft")
+
+```
+
+From the above estimates, we can see that the estimated $F_t$ is quite different from the actual $S_t$. The rolloing-horizon approach may not be suitable in this case.  
+
