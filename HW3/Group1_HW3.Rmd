@@ -1,0 +1,57 @@
+---
+title: "Network Analytics"
+subtitle: "Homework 3 - Group Part"
+author: "Group 1"
+date: "17 December 2016"
+output: pdf_document
+geometry: margin = 0.75in
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, results='asis')
+
+library(stargazer)
+```
+
+**2.** -
+
+**3. a.** We were able to replicate regression 1, 2, 3 and 5 with the available data online. However, we were missing some information e.g. savings and fraction GM and were unable to reconstruct regression 4 and 6.
+
+In the first regression model, we assess whether eigenvector centrality of leaders and number of households has any effect on uptake. We can see that eigenvector centrality of the leaders is significant but not number of households. 
+
+In the second regression model, we see if there is any correlation between number of households and degree of the leaders. Number of households appears to be significant in determining the uptake of microfinance.
+
+In the third regression model, we look at eigenvector centrality of the leaders, number of households and degree of leaders. Again, eigenvector centrality is significant in determining uptake of microfinance.
+
+In the last regression model, we regressed 4 different variables against uptake of microfinance. Fraction of taking leaders appears to be significant, along with eigenvector centrality of leaders.
+
+From the models we ran along with the models that we were unable to replicate, we can come to a conclusion that the injection points are crucial in determining the uptake of microfinance within a village. When we look at the results from the regression, we can see that eigenvector centrality of the leader, which is the indicative of the influence of the individual is particularly important as well as fraction of taking leaders. Other relevant measures such as degree of the leaders do not appear to be as important. Other social network characteristics are not as important in determining the percentage of uptake by a village, such as number of households and savings. 
+
+```{r}
+# Load data
+data <- read.csv("our_cross_sectional.csv")
+```
+
+```{r}
+# Table 3, regression 1 - eigenvector centrality of leaders, number of households
+reg1 <- lm(data = data, mf ~ eigenvector_centrality_leader + numHH)
+
+# Table 3, regression 2 - number of households, degree of leaders
+reg2 <- lm(data = data, mf ~ numHH + degree_leader)
+
+# Table 3, regression 3 - eigenvector centrality of leaders, number of households, degree of leaders
+reg3 <- lm(data = data, mf ~ eigenvector_centrality_leader + numHH + degree_leader)
+
+# Table 3, regression 5 - eigenvector centrality of leaders, number of households, degree of leaders, fraction of taking leaders, eigevector centrality of taking leaders
+reg4 <- lm(data = data, mf ~ eigenvector_centrality_leader + numHH + fractionTakingLeaders_leaders + eigenvector_centrality_taking_leader)
+
+stargazer(reg1, reg2, reg3, reg4, dep.var.labels = "Take-up Rate", 
+          covariate.labels = c("Eigenvector Centrality of Leaders", "Number of Households", "Degree of Leaders", "Fraction of Taking Leaders", 
+                               "Eigenvector Centrality of Taking Leaders", "Constant"), 
+          digits = 6, header = FALSE, title = "Leaders/Injection points", column.sep.width = "5pt", font.size = "small",
+          omit.stat = c("ser","f"))
+```
+
+**3. b.** -
+
+
