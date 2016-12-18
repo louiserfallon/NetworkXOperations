@@ -1,0 +1,22 @@
+---
+title: "Group_1_HW3_Q3b_LF"
+author: "Louise Fallon"
+date: "18 December 2016"
+output: pdf_document
+---
+
+###Estimation Procedure
+The final model was fit using a Method of Simulated Moments approach. The dynamic simulation was run 75 times for each possible combination of parameters, $\theta$ = ($q^N, q^P, p_i(\alpha,\beta)$), the moments were averaged across those simulations, and then the set of parameters that minimised the product of the square of the average difference between the simulated moments and the empirically collected moments is identified as the set of estimates for those parameters.
+
+The moments used to estimate the model include
+
+* One non-network moment: the share of leaders who take up microfinance
+* Three proportion-based network moments: The share of households who take up microfinance with none of their neighbours having taken up, The share of households that take up microfinance - and are in the neighbourhood of a leader that takes up microfinance, and the share of 
+* Two covariance-based network moments: The covariance of the proportion of households taking up compared to the share of their neighbours who take up microfinance, and the covatiance of the proportion of households taking up compared to the proportion of second-degree neighbours that take up
+
+To estimate the standard errors for the parameter estimates, a grid-based bayesian bootstrap algorithm is used, using 1000 samples (resampling with replacement), finding the optimal parameters for each sample (weighted due to the random sampling method), and using this to estimate the sample distribution.
+
+###Conclusions Drawn
+With the chosen model (without endorsement) the paper estimates $q^N = 0.1$ and $q^P = 0.5$, with both being individually statistically significant, and also significantly different from each other. This implies that, if the modelling assumptions are correct, the probability of a neighbour taking up microfinance from someone who is informed, is higher if that person has also taken up microfinance.
+
+The robustness assessment also allows Banerjee et al to draw the conclusion that the network-based model is more highly performant than the purely distanced-based model. This implies the adoption of microfinance depends on more than just the closeness to the leaders, although there is an identified limitation that the network-based model is more accurate for later time periods.
