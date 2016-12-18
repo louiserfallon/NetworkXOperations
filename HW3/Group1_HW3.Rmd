@@ -15,17 +15,24 @@ library(stargazer)
 
 **2.** -
 
-**3. a.** We were able to replicate regression 1, 2, 3 and 5 with the available data online. However, we were missing some information e.g. savings and fraction GM and were unable to reconstruct regression 4 and 6.
+**3. a.** 
 
-In the first regression model, we assess whether eigenvector centrality of leaders and number of households has any effect on uptake. We can see that eigenvector centrality of the leaders is significant but not number of households. 
+We were able to replicate regression 1, 2, 3 and 5 with the available data online. However, we were missing some information e.g. savings and fraction GM and were unable to reconstruct regression 4 and 6.
 
-In the second regression model, we see if there is any correlation between number of households and degree of the leaders. Number of households appears to be significant in determining the uptake of microfinance.
+We were able to replicate regression 1, 2, 3 and 5 with the available data online. However, we were missing some information e.g. savings and fraction GM and were unable to reconstruct regression 4 and 6.
 
-In the third regression model, we look at eigenvector centrality of the leaders, number of households and degree of leaders. Again, eigenvector centrality is significant in determining uptake of microfinance.
+In the first regression model, we assessed whether eigenvector centrality of leaders and number of households has any effect on uptake. We can see that eigenvector centrality of the leaders is significant but not number of households. 
+
+In the second regression model, we looked to see if there is any correlation between number of households and degree of the leaders. Number of households appears to be significant in determining the uptake of microfinance.
+
+In the third regression model, we looked at eigenvector centrality of the leaders, number of households and degree of leaders. Again, eigenvector centrality is significant in determining uptake of microfinance.
 
 In the last regression model, we regressed 4 different variables against uptake of microfinance. Fraction of taking leaders appears to be significant, along with eigenvector centrality of leaders.
 
-From the models we ran along with the models that we were unable to replicate, we can come to a conclusion that the injection points are crucial in determining the uptake of microfinance within a village. When we look at the results from the regression, we can see that eigenvector centrality of the leader, which is the indicative of the influence of the individual is particularly important as well as fraction of taking leaders. Other relevant measures such as degree of the leaders do not appear to be as important. Other social network characteristics are not as important in determining the percentage of uptake by a village, such as number of households and savings. 
+From the models we ran along with the models that we were unable to replicate, we can come to a conclusion that the injection points are crucial in determining the uptake of microfinance within a village. When we look at the results from the regressions, we can see that eigenvector centrality of the leader, which is the indicative of the influence of the individual is particularly important given its high coefficients, as well as fraction of taking leaders to a lesser degree. Other relevant measures such as degree of the leaders and eigenvector centrality of taking leaders do not appear to be as important. On the other hand, social network characteristics, such as number of households and savings, are not as important in determining the percentage of uptake by a village, given their small coefficients and insignificance from the regressions. This is interesting because one would expect them to be ??? amount of savings of the households should theoretically influence whether a household participates in microfinance or not. 
+
+These findings reinforce the importance and influence of the leader, who act as key conduits for disseminating information within a village and determining the outcome of rolling out a scheme. In addition, the findings from the panel analysis also corroborates the individual regressions we ran ??? that eigenvector centrality of the leaders matters most over time in determining uptake of microfinance, as opposed to just the later stages in the roll-out of the scheme. 
+
 
 ```{r}
 # Load data
