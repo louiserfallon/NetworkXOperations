@@ -60,7 +60,17 @@ for i in v_id:
     v_data['eigenvector'] = list(nx.eigenvector_centrality(G, tol = 5e-06).values())
     
     vil_dict['eigenvector_centrality_leader'] = v_data[v_data['leader'] == 1]['eigenvector'].mean()
+    
+    ### 5/ Average betweenness centrality of leaders
+    v_data['betweenness'] = list(nx.betweenness_centrality(G).values())
+    
+    vil_dict['betweenness_centrality_leader'] = v_data[v_data['leader'] == 1][v_data['hhSurveyed'] == 1]['betweenness'].mean()
 
+    ### 9/ Average closeness centrality of leaders
+    v_data['closeness'] = list(nx.closeness_centrality(G).values())
+    
+    vil_dict['closeness_centrality_leader'] = v_data[v_data['leader'] == 1][v_data['hhSurveyed'] == 1]['closeness'].mean()
+    
     ### 11/ Number of households
     vil_dict['numHH'] = v_data.shape[0]
 
@@ -79,7 +89,9 @@ for i in v_id:
     
 # Convert list of dictionaries to json file and then to pandas
 final_df = pd.read_json(json.dumps(csd, indent = 2))
-final_df = final_df[['village', 'mf', 'degree_leader', 'eigenvector_centrality_leader', 'numHH', 'fractionLeaders', \
+final_df = final_df[['village', 'mf', 'degree_leader', 'eigenvector_centrality_leader', \
+                     'betweenness_centrality_leader', 'closeness_centrality_leader', \
+                     'numHH', 'fractionLeaders', \
                      'fractionTakingLeaders_leaders', 'eigenvector_centrality_taking_leader']]
 
 # Export dataframe to .csv file
