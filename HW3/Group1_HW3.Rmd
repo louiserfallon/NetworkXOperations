@@ -2,7 +2,7 @@
 title: "Network Analytics"
 subtitle: "Homework 3 - Group Part"
 author: "Group 1"
-date: "17 December 2016"
+date: "18 December 2016"
 output: pdf_document
 geometry: margin = 0.75in
 ---
@@ -11,32 +11,137 @@ geometry: margin = 0.75in
 knitr::opts_chunk$set(echo = FALSE, results='asis')
 
 library(stargazer)
+library(pander)
+
+# Set working directory - change to your local working direcotry 
+setwd("C:/Users/user/Dropbox (Personal)/Imperial College Business School/MSc Business Analytics/Autumn Term/Network Analytics/Git_Repo/NetworkXOperations/HW3")
 ```
 
-**2.** -
+# **2.** 
 
-**3. a.** 
+### Forecasting Model  
 
-We were able to replicate regression 1, 2, 3 and 5 with the available data online. However, we were missing some information e.g. savings and fraction GM and were unable to reconstruct regression 4 and 6.
+In the _Bass Model_ article, the forecasting model is given as below:
 
-We were able to replicate regression 1, 2, 3 and 5 with the available data online. However, we were missing some information e.g. savings and fraction GM and were unable to reconstruct regression 4 and 6.
+\begin{center}
+$$F_t = (p + q[C_{t-1} / m])(m - C_{t-1})$$
+$$F_t = pm + (q - p) C_{t-1} - \frac{q}{m} C_{t-1}^2$$
+\end{center}
 
-In the first regression model, we assessed whether eigenvector centrality of leaders and number of households has any effect on uptake. We can see that eigenvector centrality of the leaders is significant but not number of households. 
+The paraemters used in the above equation is described below:  
 
-In the second regression model, we looked to see if there is any correlation between number of households and degree of the leaders. Number of households appears to be significant in determining the uptake of microfinance.
+* $F_t$: Forecasted number of new adopters during time period $t$, denoted as $N(t)$ in the class lecture notes
+* $C_{t-1}$: Cumulative number of people who have adopted the product up to time $t - 1$
+* $p$: Coefficient of innovation (a.k.a. Rate of spontatneous adoption in the class lecture notes)
+* $q$: Coefficient of imitation (a.k.a. Rate of imitation in the class lecture notes)
+* $m$: Market size, the number of people estimated to eventually adopt the new product
+
+From the above equation, we can see that $F_t$ is a function of $C_{t-1}$ and $C_{t-1}^2$. In the article, the authors proposed to minimise the sum of squared forecast errors $\sum_{t=1}^{N} E_t^2$ where:  
+
+* $S_t$: the actual number of new adopters in period $t$, denoted as $S(t)$ in the class lecture notes
+* $E_t = F_t - S_t$, $E_t$ is the forecast error for period $t$  
+
+This is the same technique used in the Ordinary Least Square Estimation of Linear Regression, where we take $F_t$ (the forecasted number of new adopters in period _t_) to be $\hat{S_t}$ (the estimated number of adopters in period t). The equation for linear regression can be written as:
+
+\begin{center}
+$$F_t = \hat{p}\hat{m} + (\hat{q} - \hat{p}) C_{t-1} - \frac{\hat{q}}{\hat{m}} C_{t-1}^2$$
+$$\hat{S_t} = \hat{a} + \hat{b} C_{t-1} + \hat{c} C_{t-1}^2$$
+\end{center}
+
+where:
+
+\begin{center}
+$$\hat{S_t} = F_t$$
+$$\hat{a} = \hat{p}\hat{m}$$
+$$\hat{b} = \hat{q} - \hat{p}$$
+$$\hat{c} = - \frac{\hat{q}}{\hat{m}}$$
+\end{center}
+
+The system of equations involving $\hat{p}$, $\hat{q}$, and $\hat{m}$ can be rewritten as follows:
+
+\begin{center}
+$$\hat{m} = \frac{-\hat{b} \pm \sqrt{\hat{b}^2 - 4\hat{a}\hat{c}}}{2\hat{c}}$$
+$$\hat{p} = \frac{\hat{a}}{\hat{m}}$$
+$$\hat{q} = - \hat{c}\hat{m}$$
+\end{center}
+
+Note that for $\hat{m}$, we are only interested in its non-negative real root, since the market size should always be greater than or equal to zero. 
+
+In the following section, we shall perform least square regression (dependent variable is $S_t$ and independent variables are $C_{t-1}$ and $C_{t-1}^2$) using R, in order to obtain the rolling horizon estimates of $p$, $q$, $m$, and $F_t$.  
+
+### Rolling Horizon Estimate using Ordinary Least Square Regression  
+
+The table that contains the box office revenue data of "The Doctor" is included in the CSV file, _TheDoctorData.csv_. First, we shall read the revenue data from the CSV and calculate $C_{t-1}$ for each period.  
+
+```{r ReadData}
+doctorData <- read.csv("Data_Group_HW/TheDoctorData.csv")
+doctorData$"Ctlag" <- c(0, doctorData$Ct[1:(nrow(doctorData) - 1)])
+
+pander(doctorData, 
+       caption = "Revenues and Cumulative Revenues in $ Millions for THE DOCTOR")
+```
+
+Next, starting at week 5 ($t = 5$), we shall use the observed cumulative revenues, $C_{t-1}$ to obtain the rolloing-horizon estimates of the parameters.  
+
+In the following section, OLS regressions are performed (for $t = 5, 6, ..., 12$) and the eight sets of estimated parameters are tabulated below:  
+
+```{r Regression}
+finalTable = data.frame()
+
+# Start forecasting at t = 5
+tValues <- doctorData$Week[5 : nrow(doctorData)]
+for (tValue in tValues) {
+    modelDoctor <- lm(St ~ I(Ctlag) + I(Ctlag^2), data = doctorData[1 : (tValue - 1), ])
+    a <- modelDoctor$coefficients[1]
+    b <- modelDoctor$coefficients[2]
+    c <- modelDoctor$coefficients[3]
+    m <- c((-b + sqrt(b^2 - 4 * a * c)) / (2 * c), (-b - sqrt(b^2 - 4 * a * c)) / (2 * c))
+    m <- m[!is.nan(m) & m >= 0] # Only get the positive root
+    p <- a / m
+    q <- -c * m
+    Ft <- predict(modelDoctor, newdata = data.frame(Ctlag = doctorData$Ctlag[tValue]))
+    finalTable <- rbind(finalTable, data.frame(week = tValue, p = p, q = q, m = m, 
+                                               Ft = Ft, St = doctorData$St[tValue], 
+                                               row.names = NULL))
+}
+
+panderOptions('round', 3)
+pander(finalTable, caption = "Rolling Horizon Estimates of p, q, m, and Ft")
+```
+
+From the above estimates, we can see that the estimated $F_t$ is quite different from the actual $S_t$. The rolloing-horizon approach may not be suitable in this case. 
+
+# **3. a.** 
+
+### Overview
+
+The paper models the spread of information by looking at the take-up of microfinance in rural villages, with no exposure to microfinance institutions, in the south of India, to answer the following question: does the set of "leaders" initially informed have an influence on the long-run participation in microfinance? First, we will replicate some of the data used in the paper and construct some of the regression models used to estimate the impoertance of the leaders. Then, we will draw some conclusions from the results and finally we will describe the dynamic model and the structural estimation procedure that was used in the paper.
+
+### Data Replication and Regression Models
+
+The data we were able to replicate for the households of the villages and get the exact same results were the following:
+
+* Microfinance take-up rate of non-leader househols
+* Average degree of leaders
+* Average eigenvector centrality for leaders
+* Number of households
+* Fraction of leaders
+* Fraction of taking leaders
+* Average eigenvector centrality of taking leaders
+
+Besides these characteristics we reproduced the average between centrality and closeness centrality of the leaders but we got different results. With these data available we were able to reconstruct regression models 1, 2, 3 and 5.
+
+In the first regression model, we assessed whether eigenvector centrality of the leaders and number of households have any effect on the take-up rate. We can see that eigenvector centrality of the leaders is significant but the number of households is not. 
+
+In the second regression model, we looked to see if take-up rate is correlated between the number of households and degree of the leaders. Number of households appears to be significant in determining the uptake of microfinance.
 
 In the third regression model, we looked at eigenvector centrality of the leaders, number of households and degree of leaders. Again, eigenvector centrality is significant in determining uptake of microfinance.
 
-In the last regression model, we regressed 4 different variables against uptake of microfinance. Fraction of taking leaders appears to be significant, along with eigenvector centrality of leaders.
-
-From the models we ran along with the models that we were unable to replicate, we can come to a conclusion that the injection points are crucial in determining the uptake of microfinance within a village. When we look at the results from the regressions, we can see that eigenvector centrality of the leader, which is the indicative of the influence of the individual is particularly important given its high coefficients, as well as fraction of taking leaders to a lesser degree. Other relevant measures such as degree of the leaders and eigenvector centrality of taking leaders do not appear to be as important. On the other hand, social network characteristics, such as number of households and savings, are not as important in determining the percentage of uptake by a village, given their small coefficients and insignificance from the regressions. This is interesting because one would expect them to be ??? amount of savings of the households should theoretically influence whether a household participates in microfinance or not. 
-
-These findings reinforce the importance and influence of the leader, who act as key conduits for disseminating information within a village and determining the outcome of rolling out a scheme. In addition, the findings from the panel analysis also corroborates the individual regressions we ran ??? that eigenvector centrality of the leaders matters most over time in determining uptake of microfinance, as opposed to just the later stages in the roll-out of the scheme. 
-
+In the last regression model, we regressed four different variables against the take-up rate of microfinance. Fraction of taking leaders appears to be significant along with eigenvector centrality of leaders.
 
 ```{r}
 # Load data
-data <- read.csv("our_cross_sectional.csv")
+data <- read.csv("Data_Group_HW/our_cross_sectional.csv")
 ```
 
 ```{r}
@@ -59,6 +164,50 @@ stargazer(reg1, reg2, reg3, reg4, dep.var.labels = "Take-up Rate",
           omit.stat = c("ser","f"))
 ```
 
-**3. b.** -
+### Results Interpretation
 
+The summaries of the four regression models are shown in table 3. From these as well as from the summaries of the models we didn't manage to reconstruct, we can come to a conclusion that the injection points are crucial in determining the uptake of microfinance within a village. Looking at the results from the regression models, we can see that eigenvector centrality of leaders, which is the indicative of the influence of individuals is particularly important, given its high coefficients, as well as fraction of taking leaders to a lesser degree. Other relevant measures such as degree of the leaders and eigenvector centrality of taking leaders do not appear to be as important. On the other hand, social network characteristics, such as number of households and savings, are not as important in determining the percentage of uptake by a village, given their small coefficients and insignificance in the regression models. This is interesting because one would theoretically expect that the amount of savings each household has should influence whether this household participates in microfinance or not.
 
+These findings reinforce the importance and influence of leaders, who act as key conduits for disseminating information within a village and determining the outcome of rolling out a scheme. In addition, the findings from the panel analysis also corroborate the individual regression models we generated and the fact that eigenvector centrality of leaders matters most over time in determining uptake of microfinance, as opposed to just the later stages in the roll-out of the scheme.
+
+# **3. b.** 
+
+### The Model
+
+The data was collected through a questionnaire that focused on village, household and individual characteristics. This was supported by and matched with regular administrative data on who joined the program.
+
+The models that were estimated had the following structure:
+
+1. The set of initial leaders were informed and chose whether or not to participate.
+2. In each time period, households passed information on with a certain probability that varied according to whether the household had chose to participate or not.
+3. In each time period, the previously informed households decide whether to participate or not.
+
+In the baseline "information" model, $p_i(\alpha, \beta)$ is given by:
+
+$$p_i = P(participation|X_i) = \Lambda(\alpha + X_i\beta)$$
+
+### Estimation Procedure
+
+The final model was fit using a Method of Simulated Moments approach. The dynamic simulation was run 75 times for each possible combination of parameters, $\theta = (q^N, q^P, p_i(\alpha, \beta))$, the moments were averaged across those simulations, and then the set of parameters that minimised the product of the square of the average difference between the simulated moments and the empirically collected moments is identified as the set of estimates for those parameters.
+
+The moments used to estimate the model include:
+
+* One non-network moment: the share of leaders who take up microfinance.
+* Three proportion-based network moments: The share of households who take up microfinance with none of their neighbours having taken it up, the share of households that take up microfinance and are in the neighbourhood of a leader that takes up microfinance, and the share of households that take up microfinance and are in the neighbourhood of a leader who doesn't taken up microfinance.
+* Two covariance-based network moments: The covariance of the proportion of households taking up compared to the share of their neighbours who take up microfinance, and the covatiance of the proportion of households taking up compared to the proportion of second-degree neighbours that take up.
+
+To estimate the standard errors for the parameter estimates, a grid-based Bayesian bootstrap algorithm is used, using 1000 samples (resampling with replacement), finding the optimal parameters for each sample (weighted due to the random sampling method), and using this to estimate the sample distribution.
+
+### Robustness Checks
+
+The following were undertaken to deal with concerns regarding the chosen "information model":
+
+* The model was estimated with a different set of moments.
+* Microfinance participation was replaced with a "placebo" outcome, such as "type of roof".
+* Adding a linear control for the nearest distance to a leader that took up microfinance.
+
+### Conclusions Drawn
+
+With the chosen model (without endorsement) the paper estimates $q^N = 0.1$ and $q^P = 0.5$, with both being individually statistically significant, and also significantly different from each other. This implies that, if the modelling assumptions are correct, the probability of a neighbour taking up microfinance from someone who is informed, is higher if that person has also taken up microfinance.
+
+The robustness assessment also allows Banerjee et al to draw the conclusion that the network-based model is more highly performant than the purely distanced-based model. This implies the adoption of microfinance depends on more than just the closeness to the leaders, although there is an identified limitation that the networkbased model is more accurate for later time periods.
