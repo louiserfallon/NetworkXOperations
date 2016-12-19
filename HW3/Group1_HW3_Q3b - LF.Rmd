@@ -4,19 +4,45 @@ author: "Louise Fallon"
 date: "18 December 2016"
 output: pdf_document
 ---
+```{r echo=FALSE, eval=FALSE}
+##not to be included, but typos that need to be fixed in the report:
+## paraemters > parameters at the start
+## rolloing-horizon, twice in question 2
+```
+
+## Model
+
+The data was collected through a questionnaire that focused on village, household and individual characteristics, including network data. This was supported by and matched with regular administrative data on who joined the program.
+The discrete time models that were estimated had the following structure:
+
+1. The set of initial leaders (exogenously chosen) were informed and chose whether or not to participate.
+2. In each time period, households passed information on with a certain probability that varied according to
+whether the household had chosen to participate ($q^P$) or not ($q^N$).
+3. In each time period, the previously informed households decide whether to participate or not.
+In the baseline “information” model, the probability that an individual takes up microfinance, given that they are informed, $p_i(\alpha,\beta)$ is given by:
+$$p_i = P (participation|X_i) = \Delta(\alpha + X_i\beta)$$
+Where X contains attributes of the individual and its neighbours (but does not include "endorsement": whether the neighbours have taken up or not).
 
 ###Estimation Procedure
-The final model was fit using a Method of Simulated Moments approach. The dynamic simulation was run 75 times for each possible combination of parameters, $\theta$ = ($q^N, q^P, p_i(\alpha,\beta)$), the moments were averaged across those simulations, and then the set of parameters that minimised the product of the square of the average difference between the simulated moments and the empirically collected moments is identified as the set of estimates for those parameters.
+The final model was fit using a Method of Simulated Moments approach. The dynamic simulation was run 75 times for each possible combination of parameters, $\theta$ = ($q^N, q^P, p_i(\alpha,\beta)$), the moments were averaged across those simulations, and then the set of parameters that minimised the square of the average difference between the simulated moments and the empirically collected moments is identified as the set of estimates for those parameters.
 
 The moments used to estimate the model include
 
 * One non-network moment: the share of leaders who take up microfinance
 * Three proportion-based network moments: The share of households who take up microfinance with none of their neighbours having taken up, The share of households that take up microfinance - and are in the neighbourhood of a leader that takes up microfinance, and the share of 
-* Two covariance-based network moments: The covariance of the proportion of households taking up compared to the share of their neighbours who take up microfinance, and the covatiance of the proportion of households taking up compared to the proportion of second-degree neighbours that take up
+* Two covariance-based network moments: The covariance of the proportion of households taking up compared to the share of their neighbours who take up microfinance, and the covariance of the proportion of households taking up compared to the proportion of second-degree neighbours that take up
 
-To estimate the standard errors for the parameter estimates, a grid-based bayesian bootstrap algorithm is used, using 1000 samples (resampling with replacement), finding the optimal parameters for each sample (weighted due to the random sampling method), and using this to estimate the sample distribution.
+To estimate the standard errors for the parameter estimates, a grid-based Bayesian bootstrap algorithm is used, using 1000 samples (resampling with replacement), finding the optimal parameters for each sample (weighted due to the random sampling method), and using this to estimate the sample distribution.
+
+###Robustness Checks
+The following were undertaken to check and justify the use of the “information model”:
+
+* A model including endorsement effects was also run, and those effects not found to be significant.
+* The model was estimated with a different set of moments, and found that the parameters were comparable, and still significantly different.
+* Microfinance participation was replaced with a “placebo” outcome, “type of roof”, which gave very high parameters, which was expected for cases where information transmission is not highly relevant.
+* The model was compared to a model only using distance to the leaders.
 
 ###Conclusions Drawn
-With the chosen model (without endorsement) the paper estimates $q^N = 0.1$ and $q^P = 0.5$, with both being individually statistically significant, and also significantly different from each other. This implies that, if the modelling assumptions are correct, the probability of a neighbour taking up microfinance from someone who is informed, is higher if that person has also taken up microfinance.
+With the chosen model (without endorsement), the paper estimates $q^N = 0.1$ and $q^P = 0.5$, both being individually statistically significant, and significantly different from each other. This implies that the probability of a neighbour taking up microfinance from someone who is informed is higher if that person has also taken up microfinance.
 
-The robustness assessment also allows Banerjee et al to draw the conclusion that the network-based model is more highly performant than the purely distanced-based model. This implies the adoption of microfinance depends on more than just the closeness to the leaders, although there is an identified limitation that the network-based model is more accurate for later time periods.
+The robustness assessment implies the adoption of microfinance depends on more than just the closeness to the leaders, although there is an identified limitation that the dynamic model is more accurate for later time periods.
