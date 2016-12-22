@@ -11,8 +11,8 @@ import networkx as nx
 from collections import OrderedDict
 import json
 
-# Change directory to your local directory to run code
-os.chdir('C:/Users/user/Dropbox (Personal)/Imperial College Business School/MSc Business Analytics/Autumn Term/Network Analytics/Git_Repo/NetworkXOperations/HW3')
+# Change directory to your local directory to run code - Run code at the parent directory of 'Data_Group_HW' folder
+#os.chdir('C:/Users/user/Dropbox (Personal)/Imperial College Business School/MSc Business Analytics/Autumn Term/Network Analytics/Git_Repo/NetworkXOperations/HW3')
 
 # Create an empty list for the villages characteristics
 csd = []
@@ -95,4 +95,4 @@ final_df = final_df[['village', 'mf', 'degree_leader', 'eigenvector_centrality_l
                      'fractionTakingLeaders_leaders', 'eigenvector_centrality_taking_leader']]
 
 # Export dataframe to .csv file
-final_df.to_csv('our_cross_sectional.csv', sep = ',', index = False) 
+final_df.to_csv('Data_Group_HW/our_cross_sectional.csv', sep = ',', index = False) 
